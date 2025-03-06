@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 18 Dial Pad Overlay</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            overflow: hidden;
+            position: relative;
+        }
+        .container {
+            position: relative;
+            width: 100vw;
+            max-width: 400px;
+        }
+        .dial-pad-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .touch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            padding-top: 55%;
+        }
+        .touch-button {
+            width: 100%;
+            height: 0;
+            padding-bottom: 33%;
+            background: rgba(255, 255, 255, 0);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .touch-button:active {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: background 0.1s ease-in-out;
+        }
+        .call-button {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20%;
+            height: 10%;
+            background: rgba(255, 255, 255, 0);
+        }
+        .display-number {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://i.imgur.com/U12g2kU.jpg" alt="iPhone Dial Pad" class="dial-pad-image">
+        <div class="display-number" id="displayNumber"></div>
+        <div class="touch-overlay">
+            <div class="touch-button" onclick="pressKey('1')"></div>
+            <div class="touch-button" onclick="pressKey('2')"></div>
+            <div class="touch-button" onclick="pressKey('3')"></div>
+            <div class="touch-button" onclick="pressKey('4')"></div>
+            <div class="touch-button" onclick="pressKey('5')"></div>
+            <div class="touch-button" onclick="pressKey('6')"></div>
+            <div class="touch-button" onclick="pressKey('7')"></div>
+            <div class="touch-button" onclick="pressKey('8')"></div>
+            <div class="touch-button" onclick="pressKey('9')"></div>
+            <div class="touch-button" onclick="pressKey('*')"></div>
+            <div class="touch-button" onclick="pressKey('0')"></div>
+            <div class="touch-button" onclick="pressKey('#')"></div>
+        </div>
+        <div class="call-button" onclick="makeCall()"></div>
+    </div>
+    
+    <script>
+        let typedNumber = "";
+        
+        function pressKey(num) {
+            typedNumber += num;
+            document.getElementById("displayNumber").innerText = typedNumber;
+            console.log("Typed: " + typedNumber);
+        }
+        
+        async function getClipboardText() {
+            try {
+                const text = await navigator.clipboard.readText();
+                return text.replace(/[^0-9*#]/g, ""); // Sanitize input
+            } catch (err) {
+                console.error("Failed to read clipboard contents: ", err);
+                return "";
+            }
+        }
+        
+        async function autoDial() {
+            typedNumber = await getClipboardText();
+            if (typedNumber.length > 0) {
+                let index = 0;
+                document.getElementById("displayNumber").innerText = "";
+                const interval = setInterval(() => {
+                    if (index < typedNumber.length) {
+                        pressKey(typedNumber[index]);
+                        index++;
+                    } else {
+                        clearInterval(interval);
+                        setTimeout(makeCall, 1000); // Wait 1 second before calling
+                    }
+                }, 500); // Simulating typing delay
+            }
+        }
+        
+        function makeCall() {
+            if (typedNumber.length > 0) {
+                window.location.href = "tel:" + typedNumber;
+            }
+        }
+        
+        window.onload = autoDial;
+    </script>
+</body>
+</html>
