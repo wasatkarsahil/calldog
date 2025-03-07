@@ -28,47 +28,63 @@
         }
         .touch-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 30%;
+            left: 15%;
+            width: 70%;
+            height: 50%;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-            padding-top: 55%;
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
         }
         .touch-button {
             width: 100%;
-            height: 0;
-            padding-bottom: 33%;
+            height: 100%;
             background: rgba(255, 255, 255, 0);
-            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: transform 0.1s ease-in-out;
         }
         .touch-button:active {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transition: background 0.1s ease-in-out;
+            transform: scale(0.9);
         }
         .call-button {
             position: absolute;
-            bottom: 15%;
+            bottom: 12%;
             left: 50%;
             transform: translateX(-50%);
-            width: 20%;
+            width: 25%;
             height: 10%;
+            background: rgba(255, 255, 255, 0);
+        }
+        .cut-button {
+            position: absolute;
+            bottom: 23%;
+            right: 15%;
+            width: 15%;
+            height: 8%;
             background: rgba(255, 255, 255, 0);
         }
         .display-number {
             position: absolute;
-            top: 10%;
+            top: 15%;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 24px;
+            font-size: 32px;
             color: white;
             font-family: Arial, sans-serif;
+        }
+        .glitch {
+            animation: glitch 0.5s ease-in-out 2;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-2px, -2px); }
+            40% { transform: translate(2px, 2px); }
+            60% { transform: translate(-2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0, 0); }
         }
     </style>
 </head>
@@ -91,6 +107,7 @@
             <div class="touch-button" onclick="pressKey('#')"></div>
         </div>
         <div class="call-button" onclick="makeCall()"></div>
+        <div class="cut-button" onclick="deleteLastDigit()"></div>
     </div>
     
     <script>
@@ -99,13 +116,17 @@
         function pressKey(num) {
             typedNumber += num;
             document.getElementById("displayNumber").innerText = typedNumber;
-            console.log("Typed: " + typedNumber);
+        }
+        
+        function deleteLastDigit() {
+            typedNumber = typedNumber.slice(0, -1);
+            document.getElementById("displayNumber").innerText = typedNumber;
         }
         
         async function getClipboardText() {
             try {
                 const text = await navigator.clipboard.readText();
-                return text.replace(/[^0-9*#]/g, ""); // Sanitize input
+                return text.replace(/[^0-9*#]/g, "");
             } catch (err) {
                 console.error("Failed to read clipboard contents: ", err);
                 return "";
@@ -123,10 +144,15 @@
                         index++;
                     } else {
                         clearInterval(interval);
-                        setTimeout(makeCall, 1000); // Wait 1 second before calling
+                        setTimeout(triggerGlitch, 500);
                     }
-                }, 500); // Simulating typing delay
+                }, 400);
             }
+        }
+        
+        function triggerGlitch() {
+            document.body.classList.add("glitch");
+            setTimeout(makeCall, 1000);
         }
         
         function makeCall() {
